@@ -12,6 +12,7 @@
 // Description: A small toy vehicle constructed for my nephew during christmas of 2018.
 //    The vehicle reads in serial command characters from an Android based phone app.
 //    These commands then control how the vehicle moves, lifts objects, or lights up.
+//    Android app used: Arduino Bluetooth RC Car, Andi.Co
 
 // Libraries
 #include <SoftwareSerial.h>
