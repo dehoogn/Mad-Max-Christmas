@@ -1,13 +1,44 @@
-// Title:     Mad Max Christmas
-// Author:    Neil deHoog
-// Date:      Dec 23, 2018
-// Hardware:  HC-05 Bluetooth Module x1
-//            SG-90 Continous Rotation DC Motor x2
-//            SG-90 Micro Servo x2
-//            L298N Motor Driver x1
-//            ATmega328p Processor onboard Arduino Nano x1
-//            MB102 Mini USB to Breadboard Power Supply Module x1
-//            5v USB battery pack (2.4A supply) x1
-// Description: A small toy vehicle constructed for my nephew during christmas of 2018.
-//    The vehicle reads in serial command characters from an Android based phone app.
-//    These commands then control how the vehicle moves, lifts objects, or lights up.
+Title:     Mad Max Christmas
+Author:    Neil deHoog
+Date:      Dec 23, 2018
+Hardware:  HC-05 Bluetooth Module x1
+           SG-90 Continous Rotation DC Motor x2
+           SG-90 Micro Servo x2
+           L298N Motor Driver x1
+           ATmega328p Processor onboard Arduino Nano x1
+           MB102 Mini USB to Breadboard Power Supply Module x1
+           5v USB battery pack (2.4A supply) x1
+Description: A small toy vehicle constructed for my nephew during christmas of 2018.
+   The vehicle reads in serial command characters from an Android based phone app.
+   These commands then control how the vehicle moves, lifts objects, or lights up.
+   Android app used: Arduino Bluetooth RC Car, Andi.Co
+
+Arduino Nano -> Peripheral Pin Connections:
+D3 - Receive bluetooth serial commands. Connect to the TX pin on the HC-05
+D4 - Transmit bluetooth serial commands. Connect to the RX pin on the HC-05
+A0 - Left LED
+A1 - Right LED
+D5 - Left motor reverse enable. Connect to INIT1 pin on the L298N
+D6 - Left motor forward enable. Connect to INIT2 pin on the L298N
+D9 - Right motor reverse enable. Connect to INIT3 pin on the L298N
+D10 - Right motor forward enable. Connect to INIT4 pin on the L298N
+D7 - Left servo position command. Connect to the signal wire of the servo
+D8 - Right servo position command. Connect to the signal wire of the servo
+
+Serial Character Commands
+0-9 - Set servo positions for lifting bucket
+'q' - Max servo angle for lifting bucket
+'S' - Stop
+'F' - Forward
+'B' - Backwards
+'L' - Stationary left turn
+'R' - Stationary right turn
+'G' - Foward and left turn
+'I' - Forward and right turn
+'H' - Reverse and left turn
+'J' - Reverse and right turn
+'W' - Headlights on
+'w' - Headlights off
+'U' - Taillights on
+'u' - Taillights off
+'X' - toggle hazards
