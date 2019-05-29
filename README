@@ -1,0 +1,13 @@
+// Title:     Mad Max Christmas
+// Author:    Neil deHoog
+// Date:      Dec 23, 2018
+// Hardware:  HC-05 Bluetooth Module x1
+//            SG-90 Continous Rotation DC Motor x2
+//            SG-90 Micro Servo x2
+//            L298N Motor Driver x1
+//            ATmega328p Processor onboard Arduino Nano x1
+//            MB102 Mini USB to Breadboard Power Supply Module x1
+//            5v USB battery pack (2.4A supply) x1
+// Description: A small toy vehicle constructed for my nephew during christmas of 2018.
+//    The vehicle reads in serial command characters from an Android based phone app.
+//    These commands then control how the vehicle moves, lifts objects, or lights up.
