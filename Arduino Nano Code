@@ -1,0 +1,320 @@
+// Title:     Mad Max Christmas
+// Author:    Neil deHoog
+// Date:      Dec 23, 2018
+// Hardware:  HC-05 Bluetooth Module x1
+//            SG-90 Continous Rotation DC Motor x2
+//            SG-90 Micro Servo x2
+//            L298N Motor Driver x1
+//            ATmega328p Processor onboard Arduino Nano x1
+//            MB102 Mini USB to Breadboard Power Supply Module x1
+//            5v USB battery pack (2.4A supply) x1
+
+// Description: A small toy vehicle constructed for my nephew during christmas of 2018.
+//    The vehicle reads in serial command characters from an Android based phone app.
+//    These commands then control how the vehicle moves, lifts objects, or lights up.
+
+// Libraries
+#include <SoftwareSerial.h>
+#include <Servo.h>
+
+// Arduino Nano Pinout Constants
+#define RX 3          // Rx pin on arduino. Connect to Tx pin on HC-05
+#define TX 4          // Tx pin on arduino. Connect to Rx pin on HC-05 (3.3V max)
+#define L_LED A0      // Left LED
+#define R_LED A1      // Right LED
+#define PWR_LF 6      // Left Motor Forward
+#define PWR_LR 5      // Left Motor Reverse
+#define PWR_RF 10     // Right Motor Forward
+#define PWR_RR 9      // Right Motor Reverse
+#define SERVOL 7      // Left Servo
+#define SERVOR 8      // Right Servo
+
+// Constant to determine if you want to run a serial monitor report of key values
+// Choose 1 to run report and 0 to have no report
+#define REP 1
+
+// Global Variables
+char btCommand = 'S'; // Variable to receive bluetooth command from controller
+int power = 255;      // Value 0-255 for PWM to left and right tires
+int servo_angle = 0;  // Value 0-180 that sets servo angle
+int hazard = 0;       // Sets hazzards as active or not active
+int toggle = 0;       // Counter to toggle hazards on and off
+
+// Set blueooth serial connection
+SoftwareSerial bluetooth(RX, TX);
+
+// Add Servo objects
+Servo servoL, servoR;
+
+///////////////////////////////////////////////////////////////////////////////
+// Initialization Function
+///////////////////////////////////////////////////////////////////////////////
+void setup()
+{
+  // Pinout initialization
+  pinMode(RX, INPUT);         // Set Rx pin to input
+  pinMode(TX, OUTPUT);        // Set Tx pin to output
+  pinMode(L_LED, OUTPUT);     // Set left LED pin to output
+  pinMode(R_LED, OUTPUT);     // Set right LED pin to output
+  pinMode(PWR_LF, OUTPUT);    // Set left motor forward pin to output
+  pinMode(PWR_LR, OUTPUT);    // Set left motor reverse pin to output
+  pinMode(PWR_RF, OUTPUT);    // Set right motor forward pin to output
+  pinMode(PWR_RR, OUTPUT);    // Set right motor reverse pin to output
+  pinMode(SERVOL, OUTPUT);    // Set left servo pin to output
+  pinMode(SERVOR, OUTPUT);    // Set right servo pint to output
+
+  // Set all motor outputs low
+  digitalWrite(PWR_LF, LOW);
+  digitalWrite(PWR_LR, LOW);
+  digitalWrite(PWR_RF, LOW);
+  digitalWrite(PWR_RR, LOW);
+  digitalWrite(L_LED, HIGH);
+  digitalWrite(R_LED, HIGH);+
+  
+
+  // Servo Initialization
+  servoL.attach(SERVOL);
+  servoR.attach(SERVOR);
+  servoL.write(180);
+  servoR.write(0);
+
+  // Bluetooth initialization
+  bluetooth.begin(9600);      // Begin bluetooth serial connection at 9600bps
+  Serial.begin(9600);         // Begin the USB serial connection at 9600bps
+  while (!Serial){}           // Wait for USB serial connection confirmation
+  Serial.println("Connection Succesful"); // Confirm connection to bluetooth
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Main Function
+// Reads in a bluetooth command
+// Acts on the command
+// Reports through USB serial what the command was
+///////////////////////////////////////////////////////////////////////////////
+void loop()
+{
+  if (bluetooth.available() > 0)
+  {
+    btCommand = bluetooth.read();
+    command();
+    if (REP)
+      Serial.println(btCommand);
+  }
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Received Bluetooth Command Operations
+///////////////////////////////////////////////////////////////////////////////
+void command()
+{
+  // Check if hazards are active
+  if (btCommand == 'x')
+    hazard = 0;
+    
+  // If hazards are not active, proceed with move commands
+  if (!hazard)
+  {
+    switch(btCommand)
+    {
+      case '0':
+        servo_angle = 0;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '1':
+        servo_angle = 20;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '2':
+        servo_angle = 40;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '3':
+        servo_angle = 60;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '4':
+        servo_angle = 80;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '5':
+        servo_angle = 100;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '6':
+        servo_angle = 120;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '7':
+        servo_angle = 140;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '8':
+        servo_angle = 160;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case '9':
+        servo_angle = 180;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case 'q':
+        servo_angle = 180;
+        servoL.write(180-servo_angle);
+        servoR.write(servo_angle);
+        break;
+      case 'S': // Stop
+        digitalWrite(PWR_LF, LOW);
+        digitalWrite(PWR_LR, LOW);
+        digitalWrite(PWR_RF, LOW);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, LOW);
+        break;
+      case 'F': // Forwards
+        analogWrite(PWR_LF, power);
+        digitalWrite(PWR_LR, LOW);
+        analogWrite(PWR_RF, power);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, HIGH);
+        digitalWrite(R_LED, HIGH);
+        break;
+      case 'B': // Backwards
+        digitalWrite(PWR_LF, LOW);
+        analogWrite(PWR_LR, power);
+        digitalWrite(PWR_RF, LOW);
+        analogWrite(PWR_RR, power);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, LOW);
+        break;
+      case 'L': // Left
+        analogWrite(PWR_LF, power);
+        digitalWrite(PWR_LR, LOW);
+        digitalWrite(PWR_RF, LOW);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, HIGH);
+        digitalWrite(R_LED, LOW);
+        break;
+      case 'R': // Right
+        digitalWrite(PWR_LF, LOW);
+        digitalWrite(PWR_LR, LOW);
+        analogWrite(PWR_RF, power);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, HIGH);
+        break;
+      case 'G': // Forward Left
+        analogWrite(PWR_LF, power);
+        digitalWrite(PWR_LR, LOW);
+        analogWrite(PWR_RF, power/2);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, HIGH);
+        digitalWrite(R_LED, HIGH);
+        break;
+      case 'I': // Forward Right
+        analogWrite(PWR_LF, power/2);
+        digitalWrite(PWR_LR, LOW);
+        analogWrite(PWR_RF, power);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, HIGH);
+        digitalWrite(R_LED, HIGH);
+        break;
+      case 'H': // Backwards Left
+        digitalWrite(PWR_LF, LOW);
+        analogWrite(PWR_LR, power/2);
+        digitalWrite(PWR_RF, LOW);
+        analogWrite(PWR_RR, power);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, LOW);
+        break;
+      case 'J': // Backwards Right
+        digitalWrite(PWR_LF, LOW);
+        analogWrite(PWR_LR, power);
+        digitalWrite(PWR_RF, LOW);
+        analogWrite(PWR_RR, power/2);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, LOW);
+        break;
+      case 'W': // Headlights on
+        digitalWrite(PWR_LF, LOW);
+        digitalWrite(PWR_LR, LOW);
+        digitalWrite(PWR_RF, LOW);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, HIGH);
+        digitalWrite(R_LED, LOW);
+        break;
+      case 'w': // Headlights off
+        digitalWrite(PWR_LF, LOW);
+        digitalWrite(PWR_LR, LOW);
+        digitalWrite(PWR_RF, LOW);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, LOW);
+        break;
+      case 'U': // Tailights on
+        digitalWrite(PWR_LF, LOW);
+        digitalWrite(PWR_LR, LOW);
+        digitalWrite(PWR_RF, LOW);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, HIGH);
+        break;
+      case 'u': // Tailights off
+        digitalWrite(PWR_LF, LOW);
+        digitalWrite(PWR_LR, LOW);
+        digitalWrite(PWR_RF, LOW);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, HIGH);
+        break;
+      case 'X': // Hazzards on
+        digitalWrite(PWR_LF, LOW);
+        digitalWrite(PWR_LR, LOW);
+        digitalWrite(PWR_RF, LOW);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, LOW);
+        hazard = 1;
+        break;
+      default:
+        digitalWrite(PWR_LF, LOW);
+        digitalWrite(PWR_LR, LOW);
+        digitalWrite(PWR_RF, LOW);
+        digitalWrite(PWR_RR, LOW);
+        digitalWrite(L_LED, LOW);
+        digitalWrite(R_LED, LOW);
+        break;
+    }
+  }
+  
+  // If hazards are active, toggle them on and off
+  else
+  {
+    if (toggle >= 0 && toggle < 15)
+    {
+      toggle++;
+      digitalWrite(L_LED, LOW);
+      digitalWrite(R_LED, LOW);
+    }
+    else if (toggle >= 15 && toggle < 30)
+    {
+      toggle++;
+      digitalWrite(L_LED, HIGH);
+      digitalWrite(R_LED, HIGH);
+    }
+    else
+    {
+      toggle = 0;
+    }
+  }
+}
